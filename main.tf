@@ -5,8 +5,8 @@ provider "aws" {
   # region = "us-east-1"
 }
 
-module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=v5.1.0"
+
 
   # VPC Configuration
   name                  = var.name
