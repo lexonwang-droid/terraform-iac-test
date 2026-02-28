@@ -17,19 +17,19 @@ output "vpc_ipv6_cidr_block" {
   value       = module.vpc.vpc_ipv6_cidr_block
 }
 
-output "vpc_default_security_group_id" {
+output "default_security_group_id" {
   description = "The ID of the default security group"
-  value       = module.vpc.vpc_default_security_group_id
+  value       = module.vpc.default_security_group_id
 }
 
-output "vpc_default_network_acl_id" {
+output "default_network_acl_id" {
   description = "The ID of the default network ACL"
-  value       = module.vpc.vpc_default_network_acl_id
+  value       = module.vpc.default_network_acl_id
 }
 
-output "vpc_default_route_table_id" {
+output "default_route_table_id" {
   description = "The ID of the default route table"
-  value       = module.vpc.vpc_default_route_table_id
+  value       = module.vpc.default_route_table_id
 }
 
 ################################################################################
@@ -51,28 +51,13 @@ output "database_subnets" {
   value       = module.vpc.database_subnets
 }
 
-output "public_subnet_ids" {
-  description = "List of IDs of public subnets"
-  value       = module.vpc.public_subnet_ids
-}
-
-output "private_subnet_ids" {
-  description = "List of IDs of private subnets"
-  value       = module.vpc.private_subnet_ids
-}
-
-output "database_subnet_ids" {
-  description = "List of IDs of database subnets"
-  value       = module.vpc.database_subnet_ids
-}
-
 ################################################################################
 # NAT Gateways
 ################################################################################
 
 output "nat_gateway_ids" {
   description = "List of NAT Gateway IDs"
-  value       = module.vpc.nat_gateway_ids
+  value       = module.vpc.natgw_ids
 }
 
 output "nat_public_ips" {
@@ -80,14 +65,13 @@ output "nat_public_ips" {
   value       = module.vpc.nat_public_ips
 }
 
-
 ################################################################################
 # VPN Gateway
 ################################################################################
 
 output "vpn_gateway_id" {
   description = "The ID of the VPN Gateway"
-  value       = module.vpc.vpn_gateway_id
+  value       = module.vpc.vgw_id
 }
 
 ################################################################################
@@ -115,7 +99,7 @@ output "database_route_table_ids" {
 
 output "database_subnet_group_id" {
   description = "The ID of the database subnet group"
-  value       = module.vpc.database_subnet_group_id
+  value       = module.vpc.database_subnet_group
 }
 
 output "database_subnet_group_name" {
