@@ -8,39 +8,51 @@ import "tfplan/v2" as tfplan
 allowed_cidrs = ["10.10.0.0/16"]
 
 # Get all resource changes
-all_resource_changes = tfplan.resource_changes
+all_changes = tfplan.resource_changes
 
-# Filter for VPC resources
-vpc_resources = filter all_resource_changes as _, rc {
-    rc.type is "aws_vpc"
-}
-
-# Check each VPC for allowed CIDR
+# Find any resource that has vpc_cidr_block in planned values
 violations = []
-for vpc_resources as _, rc {
-    # Get the new/created VPC CIDR
-    change = rc.change
-    new_cidr = change.after.cidr_block
-
-    # Check if CIDR is in allowed list
-    if new_cidr not in allowed_cidrs {
-        violations += [{
-            "address": rc.address,
-            "requested_cidr": new_cidr,
-            "allowed_cidrs": allowed_cidrs,
-        }]
+for all_changes as _, rc {
+    # Skip data sources
+    if rc.mode is "data" {
+        continue
+    }
+    
+    planned = rc.change.planned_values
+    
+    if defined(planned) {
+        # Direct VPC resource
+        if rc.type is "aws_vpc" and defined(planned.cidr_block) {
+            cidr = planned.cidr_block
+            if cidr not in allowed_cidrs {
+                violations += [{
+                    "address": rc.address,
+                    "requested_cidr": cidr,
+                }]
+            }
+        }
+        # VPC module output
+        else if defined(planned.vpc_cidr_block) {
+            cidr = planned.vpc_cidr_block
+            if cidr not in allowed_cidrs {
+                violations += [{
+                    "address": rc.address,
+                    "requested_cidr": cidr,
+                }]
+            }
+        }
     }
 }
 
-# Main rule - fail if any violations
+# Main rule
 main = rule {
     length(violations) is 0
 }
 
-# Detailed message
+# Message
 message = if length(violations) > 0 {
     "VPC CIDR violation: Only " + string(allowed_cidrs) + " is allowed. " +
     "Requested: " + violations[0].requested_cidr
 } else {
-    "VPC CIDR check passed. Allowed: " + string(allowed_cidrs)
+    "VPC CIDR check passed."
 }
