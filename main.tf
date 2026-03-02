@@ -4,7 +4,7 @@ provider "aws" {
   region = "ap-northeast-1"
 }
 
-module "vpc-test" {
+module "vpc" {
   source = "git::https://github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=v5.1.0"
 
 
