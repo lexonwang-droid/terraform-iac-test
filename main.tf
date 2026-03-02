@@ -1,7 +1,7 @@
 provider "aws" {
   # Region is typically configured via environment variable or backend config
   # Uncomment and set region if needed:
-  # region = "us-east-1"
+  region = "ap-northeast-1"
 }
 
 module "vpc-test" {
