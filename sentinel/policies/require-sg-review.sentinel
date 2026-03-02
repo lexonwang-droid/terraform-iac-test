@@ -1,0 +1,33 @@
+# Sentinel Policy: Require Security Group Review
+#
+# This policy prevents the creation or modification of Security Groups
+# without manual review/approval
+
+import "tfplan/v2" as tfplan
+
+# Get all resource changes
+all_resource_changes = tfplan.resource_changes
+
+# Filter for security group resources
+security_group_resources = filter all_resource_changes as _, rc {
+    rc.type is "aws_security_group" or
+    rc.type is "aws_security_group_rule" or
+    rc.type matches "^aws_vpc_security_group"
+}
+
+# Check if any security group changes exist
+sg_change_count = length(security_group_resources)
+
+# Main rule - fail if any security group changes detected
+main = rule {
+    sg_change_count is 0
+}
+
+# Optional: Print detailed message
+message = if sg_change_count > 0 {
+    "Security Group changes detected: " + string(sg_change_count) + " resource(s) will be modified. " +
+    "This policy requires manual review before applying. " +
+    "Please contact your security team to approve this change."
+} else {
+    "No Security Group changes detected. Apply allowed."
+}
