@@ -1,0 +1,46 @@
+# Sentinel Policy: Restrict VPC CIDR to 10.10.0.0/16
+#
+# This policy ensures VPCs can only be created with the approved CIDR block
+
+import "tfplan/v2" as tfplan
+
+# Allowed CIDR blocks
+allowed_cidrs = ["10.10.0.0/16"]
+
+# Get all resource changes
+all_resource_changes = tfplan.resource_changes
+
+# Filter for VPC resources
+vpc_resources = filter all_resource_changes as _, rc {
+    rc.type is "aws_vpc"
+}
+
+# Check each VPC for allowed CIDR
+violations = []
+for vpc_resources as _, rc {
+    # Get the new/created VPC CIDR
+    change = rc.change
+    new_cidr = change.after.cidr_block
+
+    # Check if CIDR is in allowed list
+    if new_cidr not in allowed_cidrs {
+        violations += [{
+            "address": rc.address,
+            "requested_cidr": new_cidr,
+            "allowed_cidrs": allowed_cidrs,
+        }]
+    }
+}
+
+# Main rule - fail if any violations
+main = rule {
+    length(violations) is 0
+}
+
+# Detailed message
+message = if length(violations) > 0 {
+    "VPC CIDR violation: Only " + string(allowed_cidrs) + " is allowed. " +
+    "Requested: " + violations[0].requested_cidr
+} else {
+    "VPC CIDR check passed. Allowed: " + string(allowed_cidrs)
+}
